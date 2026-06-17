@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0f6f69">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="WoundMeasure">
+    <title>WoundMeasure</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <h1>WoundMeasure</h1>
+          <p>Photo measurement and tissue estimate</p>
+        </div>
+      </div>
+      <button class="icon-text ghost" id="installBtn" type="button" hidden>
+        <span aria-hidden="true">+</span>
+        Install
+      </button>
+    </header>
+
+    <main class="app-shell">
+      <section class="action-band" aria-label="Capture">
+        <label class="photo-picker">
+          <input id="photoInput" class="photo-input" type="file" accept="image/*" capture="environment">
+          <span class="camera-dot" aria-hidden="true"></span>
+          <span>Take photo</span>
+        </label>
+        <button id="choosePhotoBtn" class="secondary-action" type="button">Choose file</button>
+        <button id="resetBtn" class="secondary-action" type="button">Reset</button>
+      </section>
+
+      <section class="workspace" aria-label="Photo workspace">
+        <div class="canvas-panel">
+          <canvas id="photoCanvas" aria-label="Wound photo analysis canvas"></canvas>
+          <div id="emptyState" class="empty-state">
+            <strong>Take a wound photo</strong>
+            <span>Use a ruler or known-size marker in the same photo.</span>
+          </div>
+        </div>
+
+        <aside class="control-panel" aria-label="Controls">
+          <div id="status" class="status" role="status" aria-live="polite">Ready for a photo.</div>
+
+          <div class="segmented" aria-label="Tap mode">
+            <button class="mode-btn" type="button" data-mode="scale">Scale</button>
+            <button class="mode-btn active" type="button" data-mode="wound">Wound</button>
+          </div>
+
+          <div class="field-grid">
+            <label class="field">
+              <span>Reference length</span>
+              <input id="referenceLength" type="number" min="0" step="0.01" inputmode="decimal" value="1">
+            </label>
+            <label class="field">
+              <span>Unit</span>
+              <select id="referenceUnit">
+                <option value="cm">cm</option>
+                <option value="mm">mm</option>
+                <option value="in">in</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Depth measured</span>
+              <input id="depthInput" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Optional">
+            </label>
+            <label class="field">
+              <span>Depth unit</span>
+              <select id="depthUnit">
+                <option value="cm">cm</option>
+                <option value="mm">mm</option>
+                <option value="in">in</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="tool-grid">
+            <button id="autoBtn" class="tool-btn" type="button">Auto outline</button>
+            <button id="analyzeBtn" class="tool-btn primary-tool" type="button">Analyze</button>
+            <button id="undoBtn" class="tool-btn" type="button">Undo point</button>
+            <button id="clearWoundBtn" class="tool-btn" type="button">Clear wound</button>
+          </div>
+
+          <div class="microcopy">
+            <span>Scale: tap both ends of the ruler mark.</span>
+            <span>Wound: tap around the wound edge.</span>
+          </div>
+        </aside>
+      </section>
+
+      <section class="results" aria-label="Results">
+        <div class="measure-strip">
+          <div>
+            <span>Length</span>
+            <strong id="lengthValue">--</strong>
+          </div>
+          <div>
+            <span>Width</span>
+            <strong id="widthValue">--</strong>
+          </div>
+          <div>
+            <span>Depth</span>
+            <strong id="depthValue">--</strong>
+          </div>
+          <div>
+            <span>Area</span>
+            <strong id="areaValue">--</strong>
+          </div>
+        </div>
+
+        <div class="composition-grid">
+          <div class="summary-tile healthy">
+            <span>Likely healthy</span>
+            <strong id="healthyValue">--</strong>
+          </div>
+          <div class="summary-tile unhealthy">
+            <span>Likely unhealthy</span>
+            <strong id="unhealthyValue">--</strong>
+          </div>
+          <div class="summary-tile">
+            <span>Classified tissue</span>
+            <strong id="classifiedValue">--</strong>
+          </div>
+        </div>
+
+        <div class="bars" aria-label="Tissue composition">
+          <div class="bar-row">
+            <span>Granulation</span>
+            <div class="bar"><i id="granulationBar"></i></div>
+            <strong id="granulationValue">--</strong>
+          </div>
+          <div class="bar-row">
+            <span>Epithelial</span>
+            <div class="bar"><i id="epithelialBar"></i></div>
+            <strong id="epithelialValue">--</strong>
+          </div>
+          <div class="bar-row">
+            <span>Slough</span>
+            <div class="bar"><i id="sloughBar"></i></div>
+            <strong id="sloughValue">--</strong>
+          </div>
+          <div class="bar-row">
+            <span>Necrotic</span>
+            <div class="bar"><i id="necroticBar"></i></div>
+            <strong id="necroticValue">--</strong>
+          </div>
+          <div class="bar-row">
+            <span>Unclassified</span>
+            <div class="bar"><i id="otherBar"></i></div>
+            <strong id="otherValue">--</strong>
+          </div>
+        </div>
+
+        <div class="report-actions">
+          <button id="copyReportBtn" type="button">Copy note</button>
+          <button id="downloadReportBtn" type="button">Download note</button>
+        </div>
+        <textarea id="reportOutput" readonly rows="7" spellcheck="false" aria-label="Generated wound note"></textarea>
+      </section>
+    </main>
+
+    <footer class="safety">
+      This tool supports documentation only. It does not diagnose infection, tissue viability, or treatment needs.
+      Depth cannot be calculated from one flat photo and must be measured separately.
+    </footer>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
