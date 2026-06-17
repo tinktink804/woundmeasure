@@ -1,4 +1,4 @@
-const CACHE_NAME = "woundmeasure-v1";
+const CACHE_NAME = "woundmeasure-v3";
 const APP_ASSETS = [
   "./",
   "./index.html",

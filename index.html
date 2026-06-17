@@ -30,11 +30,14 @@
     <main class="app-shell">
       <section class="action-band" aria-label="Capture">
         <label class="photo-picker">
-          <input id="photoInput" class="photo-input" type="file" accept="image/*" capture="environment">
+          <input id="cameraInput" class="photo-input" type="file" accept="image/*" capture="environment">
           <span class="camera-dot" aria-hidden="true"></span>
           <span>Take photo</span>
         </label>
-        <button id="choosePhotoBtn" class="secondary-action" type="button">Choose file</button>
+        <label class="secondary-action library-picker">
+          <input id="libraryInput" class="photo-input" type="file" accept="image/*">
+          <span>Choose photo</span>
+        </label>
         <button id="resetBtn" class="secondary-action" type="button">Reset</button>
       </section>
 

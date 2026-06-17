@@ -4,8 +4,8 @@
   const $ = (selector) => document.querySelector(selector);
 
   const els = {
-    photoInput: $("#photoInput"),
-    choosePhotoBtn: $("#choosePhotoBtn"),
+    cameraInput: $("#cameraInput"),
+    libraryInput: $("#libraryInput"),
     resetBtn: $("#resetBtn"),
     installBtn: $("#installBtn"),
     canvas: $("#photoCanvas"),
@@ -86,26 +86,34 @@
     state.scalePoints = [];
     state.woundPoints = [];
     state.analysis = null;
-    els.photoInput.value = "";
+    els.cameraInput.value = "";
+    els.libraryInput.value = "";
     updateResults();
     resizeCanvas();
     setStatus("Ready for a photo.");
   }
 
   function handlePhotoFile(file) {
-    if (!file || !file.type.startsWith("image/")) {
+    const looksLikeImage = file && (
+      !file.type ||
+      file.type.startsWith("image/") ||
+      /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(file.name || "")
+    );
+
+    if (!looksLikeImage) {
       setStatus("Choose an image file from the camera or photo library.");
       return;
     }
 
-    const nextUrl = URL.createObjectURL(file);
+    setStatus("Loading photo...");
+    const reader = new FileReader();
     const img = new Image();
     img.onload = function () {
       if (state.imageUrl) {
         URL.revokeObjectURL(state.imageUrl);
       }
       state.image = img;
-      state.imageUrl = nextUrl;
+      state.imageUrl = "";
       state.scalePoints = [];
       state.woundPoints = [];
       state.analysis = null;
@@ -115,10 +123,15 @@
       setStatus("Photo loaded. Mark the scale reference first.");
     };
     img.onerror = function () {
-      URL.revokeObjectURL(nextUrl);
-      setStatus("That photo could not be loaded.");
+      setStatus("That photo could not be loaded. Try Choose photo instead of Take photo.");
     };
-    img.src = nextUrl;
+    reader.onload = function () {
+      img.src = reader.result;
+    };
+    reader.onerror = function () {
+      setStatus("The photo could not be read. Try Choose photo instead.");
+    };
+    reader.readAsDataURL(file);
   }
 
   function resizeCanvas() {
@@ -992,14 +1005,12 @@
   }
 
   function bindEvents() {
-    els.photoInput.addEventListener("change", (event) => {
+    els.cameraInput.addEventListener("change", (event) => {
       handlePhotoFile(event.target.files && event.target.files[0]);
     });
 
-    els.choosePhotoBtn.addEventListener("click", () => {
-      els.photoInput.removeAttribute("capture");
-      els.photoInput.click();
-      window.setTimeout(() => els.photoInput.setAttribute("capture", "environment"), 0);
+    els.libraryInput.addEventListener("change", (event) => {
+      handlePhotoFile(event.target.files && event.target.files[0]);
     });
 
     els.resetBtn.addEventListener("click", resetAll);
