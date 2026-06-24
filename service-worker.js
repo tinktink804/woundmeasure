@@ -1,4 +1,4 @@
-const CACHE_NAME = "woundmeasure-v6";
+const CACHE_NAME = "woundmeasure-v7";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
